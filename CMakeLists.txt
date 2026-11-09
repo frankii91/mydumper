@@ -140,6 +140,10 @@ add_test(NAME checksum_missing COMMAND test_checksum_missing)
 add_executable(test_checksum_view test/unit/test_checksum_view.c)
 target_link_libraries(test_checksum_view ${GLIB2_LIBRARIES})
 add_test(NAME checksum_view COMMAND test_checksum_view)
+add_executable(test_trigger_checksum_flags test/unit/test_trigger_checksum_flags.c src/myloader/myloader_table.c)
+target_link_libraries(test_trigger_checksum_flags ${GLIB2_LIBRARIES} ${GTHREAD2_LIBRARIES})
+add_test(NAME trigger_checksum_flags COMMAND test_trigger_checksum_flags)
+add_test(NAME trigger_checksum_skip_index COMMAND test_trigger_checksum_flags skip-index)
 
 # Unit test: --use-defer livelock
 # Requires only GLib (no MySQL). Link with -DUSE_DEFER_FIX to test the fixed
