@@ -10,6 +10,10 @@ enum result_kind { NO_RESULT, NO_ROW, SQL_NULL, MATCH, MISMATCH };
 static enum result_kind result_kind;
 static guint queries, confirmed, warnings, criticals, finished, failed, missing;
 
+int get_product(void) { return SERVER_TYPE_MYSQL; }
+int get_major(void) { return 8; }
+int get_secondary(void) { return 0; }
+
 struct M_ROW *m_store_result_single_row(MYSQL *conn, const gchar *query, const char *fmt, ...)
 {
   (void)conn; (void)query; (void)fmt;

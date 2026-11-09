@@ -1,6 +1,10 @@
 /* Lexical normalization tests; no server, dump, or restore is required. */
 #include "../../src/checksum.c"
 
+int get_product(void) { return SERVER_TYPE_MYSQL; }
+int get_major(void) { return 8; }
+int get_secondary(void) { return 0; }
+
 struct M_ROW *m_store_result_single_row(MYSQL *conn, const gchar *query, const char *fmt, ...)
 {
   (void)conn;
