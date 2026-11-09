@@ -4,6 +4,7 @@
 #include <string.h>
 #include "common.h"
 #include "checksum.h"
+#include "server_detect.h"
 #include "logging.h"
 
 enum result_kind { NO_RESULT, NO_ROW, SQL_NULL, MATCH, MISMATCH };
