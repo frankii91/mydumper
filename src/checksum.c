@@ -23,6 +23,8 @@
 #include "common.h"
 
 #include "checksum.h"
+#include "checksum_view_normalize.h"
+#include "server_detect.h"
 #include "logging.h"
 #include "server_detect.h"
 
@@ -360,7 +362,7 @@ char *checksum_trigger_structure_from_database(MYSQL *conn, char *database, char
 
 static gchar *normalize_view_definition(const gchar *definition, const gchar *database, gboolean no_backslash_escapes, gboolean ansi_quotes)
 {
-  GString *normalized = g_string_new(NULL);
+  GString     *normalized = g_string_new(NULL);
   const gchar *p = definition;
   while (*p)
   {
@@ -395,7 +397,7 @@ static gchar *normalize_view_definition(const gchar *definition, const gchar *da
     }
     else if (*p == '`' || (*p == '"' && ansi_quotes) || g_ascii_isalnum(*p) || *p == '_' || *p == '$' || (guchar)*p >= 128)
     {
-      gchar quote = (*p == '`' || *p == '"') ? *p++ : 0;
+      gchar    quote = (*p == '`' || *p == '"') ? *p++ : 0;
       GString *identifier = g_string_new(NULL);
       gboolean closed = !quote;
       if (quote)
@@ -420,15 +422,12 @@ static gchar *normalize_view_definition(const gchar *definition, const gchar *da
       const gchar *next = p;
       while (g_ascii_isspace(*next))
         next++;
+      const gchar *previous = start;
+      while (previous > definition && g_ascii_isspace(previous[-1]))
+        previous--;
       /* Match complete qualifier tokens, not literals or identifier substrings. */
-      if (closed && *next == '.' && !strcmp(identifier->str, database))
-      {
-        if (quote)
-        {
-          g_string_append_c(normalized, quote);
-          g_string_append_c(normalized, quote);
-        }
-      }
+      if (closed && *next == '.' && (previous == definition || previous[-1] != '.') && !strcmp(identifier->str, database))
+        p = next + 1;
       else
         g_string_append_len(normalized, start, p - start);
       g_string_free(identifier, TRUE);
@@ -452,6 +451,12 @@ char *checksum_view_structure(MYSQL *conn, char *database, char *table)
     gchar *definition = normalize_view_definition(mr->row[0], database,
         strstr(mr->row[1], "NO_BACKSLASH_ESCAPES") != NULL,
         strstr(mr->row[1], "ANSI_QUOTES") != NULL);
+    gchar *expressions = normalize_view_expressions(definition,
+        strstr(mr->row[1], "NO_BACKSLASH_ESCAPES") != NULL,
+        strstr(mr->row[1], "ANSI_QUOTES") != NULL,
+        strstr(mr->row[1], "HIGH_NOT_PRECEDENCE") != NULL || strstr(mr->row[1], "PIPES_AS_CONCAT") != NULL);
+    g_free(definition);
+    definition = expressions;
     /* A binary hex literal preserves definition bytes and needs no SQL escaping. */
     GString *crc_query = g_string_new("SELECT LOWER(CONV(CRC32(X'");
     for (const guchar *p = (const guchar *)definition; *p; p++)
