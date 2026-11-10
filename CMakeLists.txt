@@ -134,6 +134,12 @@ OPTION(RUN_CPPCHECK "Run cppcheck" OFF)
 
 enable_testing()
 
+add_executable(test_cancel_dump test/unit/test_cancel_dump.c)
+target_compile_options(test_cancel_dump PRIVATE -ffunction-sections -fdata-sections)
+set_property(TARGET test_cancel_dump APPEND_STRING PROPERTY LINK_FLAGS " -Wl,--gc-sections")
+target_link_libraries(test_cancel_dump ${GLIB2_LIBRARIES} ${GTHREAD2_LIBRARIES})
+add_test(NAME cancel_dump COMMAND test_cancel_dump)
+
 add_executable(test_checksum_missing test/unit/test_checksum_missing.c src/checksum.c)
 target_link_libraries(test_checksum_missing ${GLIB2_LIBRARIES})
 add_test(NAME checksum_missing COMMAND test_checksum_missing)
