@@ -15,6 +15,18 @@ int get_product(void) { return SERVER_TYPE_MYSQL; }
 int get_major(void) { return 8; }
 int get_secondary(void) { return 0; }
 
+MYSQL_RES *m_store_result_critical(MYSQL *conn, const gchar *query, const char *fmt, ...)
+{
+  (void)conn; (void)query; (void)fmt;
+  g_assert_not_reached();
+}
+MYSQL_ROW STDCALL mysql_fetch_row(MYSQL_RES *result)
+{
+  (void)result;
+  g_assert_not_reached();
+}
+void STDCALL mysql_free_result(MYSQL_RES *result) { (void)result; }
+
 struct M_ROW *m_store_result_single_row(MYSQL *conn, const gchar *query, const char *fmt, ...)
 {
   (void)conn; (void)query; (void)fmt;
